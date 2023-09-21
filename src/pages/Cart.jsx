@@ -1,13 +1,22 @@
-import Navbar from '../components/Navbar'
-import Announcement from '../components/Announcement'
-import Footer from '../components/Footer'
-import styled from 'styled-components'
-import { Add, Remove } from '@mui/icons-material'
+import Navbar from '../components/Navbar';
+import Announcement from '../components/Announcement';
+import Footer from '../components/Footer';
+import styled from 'styled-components';
+import { Add, Delete, Remove } from '@mui/icons-material';
+import { mobile } from '../responsive';
+import { useSelector } from "react-redux";
+import { useState } from 'react';
+import { removeProduct } from "../redux/cartRedux";
+import { useDispatch } from "react-redux";
+
+
 
 const Container = styled.div``
 
 const Wrapper = styled.div`
     padding: 20px;  
+    ${mobile({ padding: "10px" })}
+
 `
 
 const Title = styled.h1`
@@ -33,6 +42,8 @@ const TopButton = styled.button`
 `
 
 const TopTexts = styled.div`
+    ${mobile({ display: "none" })}
+    
 `;
 
 const TopText = styled.span`
@@ -44,6 +55,8 @@ const TopText = styled.span`
 const Bottom = styled.div`
     display: flex;
     justify-content: space-between;
+    ${mobile({ flexDirection: "column" })}
+
 `
 
 const Info = styled.div`
@@ -53,6 +66,8 @@ const Info = styled.div`
 const Product = styled.div`
     display: flex;
     justify-content: space-between;
+    ${mobile({ flexDirection: "column" })}
+
     `;
 
 const ProductDetail = styled.div`
@@ -100,12 +115,14 @@ const ProductAmountContainer = styled.div`
 const ProductAmount = styled.div`
     font-size: 24px;
     margin: 5px;
+    ${mobile({ margin: "5px 15px" })}
 
 `;
 
 const ProductPrice = styled.div`
     font-size: 30px;
-    font-weight: 200;
+    font-weight: 300;
+    ${mobile({ marginBottom: "20px" })}
 
 `;
 
@@ -149,6 +166,25 @@ const Button = styled.button`
 `;
 
 const Cart = () => {
+    const cart = useSelector((state) => state.cart);
+    const dispatch = useDispatch();
+
+
+    const [quantity, setQuantity] = useState(1);
+
+    const handleQuantity = (type) => {
+        if (type === "dec") {
+          quantity > 1 && setQuantity(quantity - 1);
+
+        } else {
+          setQuantity(quantity + 1);
+        }
+      };
+
+      const handleRemoveClick = (productId) => {
+        dispatch(removeProduct({ id: productId }));
+      };
+
   return (
     <Container>
         <Announcement />
@@ -156,60 +192,45 @@ const Cart = () => {
         <Wrapper>
             <Title>Giỏ Hàng Của Bạn</Title>
             <Top>
-                <TopButton>Tiếp tục mua hàng</TopButton>
+                <TopButton>Tiếp tục mua hàng</TopButton> 
                 <TopTexts>
-                    <TopText>Giỏ hàng(2)</TopText>
+                    <TopText>Giỏ hàng({quantity})</TopText>
                     <TopText>Danh sách yêu thích</TopText>
                 </TopTexts>
-                <TopButton type="filled">Mua hàng </TopButton>
+                <TopButton type="filled">Thanh toán </TopButton>
             </Top>
             <Bottom>
-                <Info>
+                  <Info>
+                    {cart.products.map((product) => (
                     <Product>
                         <ProductDetail>
-                            <Image src="https://cdn.yeep.vn/2023/05/sg-11134201-22110-0ebbwbb0ddkvf7.jpg" />    
+                            <Image src={product.img} />    
                             <Details>
-                                <ProductName><b>Sản Phẩm:</b> Đồ bóng đá </ProductName>
-                                <ProductId><b>ID:</b> 151445051895</ProductId>
-                                <ProductColor color='black' />
-                                <ProductSize><b>Size:</b>M</ProductSize>
+                                <ProductName><b>Sản Phẩm:</b>{product.title} </ProductName>
+                                <ProductId><b>ID:</b> {product._id}</ProductId>
+                                <ProductColor color={product.color} />
+                                <ProductSize><b>Size:</b>{product.size}</ProductSize>
                             </Details>
                         </ProductDetail> 
                         <PriceDetail>
                             <ProductAmountContainer>
-                                <Remove />
-                                <ProductAmount>2</ProductAmount>
-                                <Add />
+                                <Remove onClick={() => handleQuantity("dec")} style={{cursor : 'pointer'}} />
+                                <ProductAmount>{quantity}</ProductAmount>
+                                <Add onClick={() => handleQuantity("inc")}  style={{cursor : 'pointer'}} />
+                                <Delete onClick={ handleRemoveClick}  style={{cursor : 'pointer'}} />
                             </ProductAmountContainer>
-                            <ProductPrice>199.000 VND</ProductPrice>
+                            <ProductPrice>{product.price * product.quantity} VND</ProductPrice>
                         </PriceDetail>
                     </Product>
+                    ))}
                     <Hr />
-                    <Product>
-                        <ProductDetail>
-                            <Image src="https://cdn.yeep.vn/2023/05/sg-11134201-22110-0ebbwbb0ddkvf7.jpg" />    
-                            <Details>
-                                <ProductName><b>Sản Phẩm:</b> Đồ bóng đá </ProductName>
-                                <ProductId><b>ID:</b> 151445051895</ProductId>
-                                <ProductColor color='black' />
-                                <ProductSize><b>Size:</b>M</ProductSize>
-                            </Details>
-                        </ProductDetail> 
-                        <PriceDetail>
-                            <ProductAmountContainer>
-                                <Remove />
-                                <ProductAmount>2</ProductAmount>
-                                <Add />
-                            </ProductAmountContainer>
-                            <ProductPrice>199.000 VND</ProductPrice>
-                        </PriceDetail>
-                    </Product>
-                </Info>
+                      
+                  </Info>
                 <Summary>
                     <SummaryTitle>Đơn Hàng</SummaryTitle>
                     <SummaryItem>
                         <SummaryItemText>Tổng tiền</SummaryItemText>
-                        <SummaryItemPrice>398.000 VND</SummaryItemPrice>
+                        <SummaryItemPrice>{cart.total} VND</SummaryItemPrice>
                     </SummaryItem>
                     <SummaryItem>
                         <SummaryItemText>Phí ship</SummaryItemText>
@@ -221,7 +242,7 @@ const Cart = () => {
                     </SummaryItem>
                     <SummaryItem>
                         <SummaryItemText type="total">Tổng cộng</SummaryItemText>
-                        <SummaryItemPrice>398.000 VND</SummaryItemPrice>
+                        <SummaryItemPrice>{cart.total} VND</SummaryItemPrice>
                     </SummaryItem>
                     <Button>Thanh Toán</Button>
                 </Summary>

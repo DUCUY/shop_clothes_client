@@ -1,6 +1,6 @@
-
 import styled from "styled-components"
-
+import { mobile } from "../responsive"
+import { Link } from "react-router-dom"
 
 const Container = styled.div`
     width: 100vw;
@@ -21,6 +21,8 @@ const Wrapper = styled.div`
     width: 25%;
     padding: 20px;
     background-color: white;
+    ${mobile({ width: "75%" })}
+
 `
 
 const Form = styled.form`
@@ -57,7 +59,7 @@ const Button = styled.button`
     margin: 10px 10px;
     
 `
-const Link = styled.a`
+const Div = styled.div`
     margin: 10px 10px;
     font-size: 12px;
     text-decoration: underline;
@@ -79,7 +81,9 @@ const Register = () => {
                    Shop cam đoan chính sách bảo mật thông tin của khách hàng.
                 </Agreement>
                 <Button>Đăng Ký</Button>
-                <Link>Bạn đã có tài khoản. Triển đến trang đăng nhập. </Link>
+                <Link to="/login" style={{ textDecoration: 'none', color: 'black' }}>
+                    <Div>Bạn đã có tài khoản. Triển đến trang đăng nhập. </Div>
+                </Link>
 
             </Form>
         </Wrapper>

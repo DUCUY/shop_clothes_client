@@ -1,4 +1,11 @@
-import styled from "styled-components"
+import styled from "styled-components";
+import { mobile } from "../responsive";
+import { useState } from "react";
+import { login } from "../redux/apiCall";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+
+
 
 const Container = styled.div`
     width: 100vw;
@@ -19,6 +26,8 @@ const Wrapper = styled.div`
     width: 25%;
     padding: 20px;
     background-color: white;
+    ${mobile({ width: "75%" })}
+
 `
 
 const Form = styled.form`
@@ -47,28 +56,61 @@ const Button = styled.button`
     color: white;
     cursor: pointer;
     margin-bottom: 10px;
+    &:disabled {
+        color: green;
+        cursor: not-allowed;
+    }
 `
 
-const Link = styled.a`
+const Div = styled.div`
+    text-decoration: underline;
+    color: black;
     margin: 10px 0px;
     font-size: 12px;
-    text-decoration: underline;
     cursor: pointer;
      
 `
+const Error = styled.span`
+    color: red;
+    font-size: 12px;
+
+`
+
 
 
 const Login = () => {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const dispatch = useDispatch();
+    const { isFetching, error } = useSelector((state) => state.user);
+
+    const handleClick = (e) => {
+        e.preventDefault();
+        login(dispatch, { email, password });
+    };
+
   return (
     <Container>
         <Wrapper>
             <Tilte>Đăng Nhập</Tilte>
             <Form>
-                <Input placeholder="email" />
-                <Input placeholder="password" />
-                <Button>Đăng Nhập</Button>
-                <Link>Bạn đã quên mật khẩu của mình? </Link>
-                <Link>Đăng ký tài khoản mới. </Link>
+                <Input placeholder="email" 
+                    onChange={(e) => setEmail(e.target.value)} />
+                <Input placeholder="password"
+                    type="password" 
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+                <Button onClick={handleClick} disabled={isFetching}>
+                    Đăng Nhập
+                </Button>
+                 {error && <Error>Nhập thông tin bị sai hoặc còn thiếu xót!</Error>}
+                {/* <Link >
+                    
+                </Link> */}
+                <Div>Bạn đã quên mật khẩu của mình?</Div>
+                <Link to="/register">
+                    <Div>Đăng ký tài khoản mới.</Div>
+                </Link>
             </Form>
         </Wrapper>
     </Container>

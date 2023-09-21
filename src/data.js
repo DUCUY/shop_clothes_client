@@ -30,19 +30,19 @@ export const categories = [
    { id: 1,
     img: "https://www.way.com.vn/vnt_upload/news/hinh-noi-dung/loi-ich-cua-viec-tap-gym.png",
     title: "THỂ THAO",
-    cat:""
+    categorie:"thethao"
   },
   {
     id: 2,
     img: "https://product.hstatic.net/200000247969/product/vang-couple_ea185762ade541ac8959881b35978f75_master.jpg",
     title: "BÓNG ĐÁ",
-    cat:""
+    categorie:"bongda"
   },
   {
     id: 3,
     img: "https://product.hstatic.net/200000247969/product/ngoc-couple_6530673b33844c6fa7fc6ebbfefa454c_master.jpg",
     title: "THI ĐẤU",
-    cat:""
+    categorie:"thidau"
   },
 ]
 

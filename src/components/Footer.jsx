@@ -1,10 +1,14 @@
 import { Facebook, Instagram, Room, Twitter, YouTube } from "@mui/icons-material"
 import { styled } from "styled-components"
+import { mobile } from '../responsive'
+
 // import { Link } from "react-router-dom"
 
 const Container = styled.div`
     display: flex;
     background-color: #C0C0C0;
+    ${mobile({ flexDirection: "column" })};
+
 
 ` 
 const Left = styled.div`
@@ -39,6 +43,8 @@ const SocialIcon =  styled.div`
 const Center = styled.div`
     flex: 1;
     padding: 20px;
+    ${mobile({ display: "none" })};
+
 
 `
 const Title = styled.h3`
@@ -60,6 +66,8 @@ const ListItem = styled.li`
 const Right = styled.div`
     flex: 1;
     padding: 20px;
+    ${mobile({ backgroundColor: "#C0C0C0" })};
+
 `
 const ContactItem = styled.div`
     margin-bottom: 20px;
