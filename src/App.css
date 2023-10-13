@@ -39,3 +39,21 @@
     transform: rotate(360deg);
   }
 }
+
+
+.radio-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  /* background-color: ${(props) => props.color}; */
+  margin: 0px 5px;
+  cursor: pointer;
+  border: 1px solid black;
+}
+
+.radio-color.active {
+  border: 3px solid gray;
+  height: 24px;
+  width: 24px;
+
+}

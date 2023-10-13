@@ -2,13 +2,15 @@ import styled from "styled-components"
 import Navbar from '../components/Navbar'
 import Announcement from '../components/Announcement'
 import Footer from "../components/Footer"
+import '../App.css'
 import { Add, FavoriteBorderOutlined, Remove } from "@mui/icons-material"
 import { mobile } from "../responsive"
-import { useLocation } from "react-router-dom";
+import { useLocation, useHistory } from "react-router-dom";
 import { useEffect, useState } from "react"
 import { publicRequest } from "../requestMethods";
 import { addProduct } from "../redux/cartRedux";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import formatVND from "../util/formatVND"
 
 
 const Container = styled.div``
@@ -57,21 +59,22 @@ const FilterContainer = styled.div`
 
 `
 const Filter = styled.div`
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 `
 const FilterTitle = styled.span`
-  font-size: 20px;
-  font-weight: 200;
+    font-size: 20px;
+    font-weight: 200;
 `
-const FilterColor = styled.div`
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background-color: ${(props) => props.color};
-    margin: 0px 5px;
-    cursor: pointer;
-`
+// const FilterColor = styled.div`
+//     width: 20px;
+//     height: 20px;
+//     border-radius: 50%;
+//     background-color: ${(props) => props.color};
+//     margin: 0px 5px;
+//     cursor: pointer;
+//     border: 1px solid black;
+// `
 const FilterSize = styled.select`
     margin-left: 10px;
     padding: 5px;
@@ -126,81 +129,113 @@ const Product = () => {
     const [color, setColor] = useState("");
     const [size, setSize] = useState("");
     const dispatch = useDispatch();
-
+    const user = useSelector((state) => state.user.currentUser);
+    const next = useHistory();
     useEffect(() => {
         const getProduct = async () => {
-          try {
-            const res = await publicRequest.get("/products/find/" + id);
-            setProduct(res.data);
-          } catch {}
+            try {
+                const res = await publicRequest.get("/products/find/" + id);
+                setProduct(res.data);
+            } catch { }
         };
         getProduct();
-      }, [id]);
+    }, [id]);
+
+    const iduser = useSelector(state => state.user.currentUser)?._id;
+    const favorites =  async (id) => {
+        if( !iduser ){
+            next.push('/login');
+        } else{
+           await publicRequest.post(`users/favorites/${iduser}`, {productId: id});
+        }
+    }
 
     const handleQuantity = (type) => {
         if (type === "dec") {
-          quantity > 1 && setQuantity(quantity - 1);
+            quantity > 1 && setQuantity(quantity - 1);
         } else {
-          setQuantity(quantity + 1);
+            setQuantity(quantity + 1);
         }
-      };
-    
+    };
+
     const handleClick = () => {
-        dispatch(
-          addProduct({ ...product, quantity, color, size })
-        );
-      };
+        if (!user) {
+            next.push("/login");
+        } else {
 
-  return (
-    <Container>
-        <Announcement />
-        <Navbar />
-        <Wrapper>
-            <ImgContainer>
-                <Image src={product.img} />
-            </ImgContainer>
-            <InfoContainer>
-                <Title>{product.title}</Title>
-                <Description>{product.description}</Description>
-                <Price>{product.price} VND</Price>
-                <FilterContainer>
-                    <Filter>
-                        <FilterTitle>Màu sắc:</FilterTitle>
-                        {product.color?.map((c) =>(
-                            <FilterColor color={c} key={c} onClick={() => setColor(c)} />
-                        ))}
-                    </Filter>
-                    
-                    <Filter>
-                        <FilterTitle>Size:</FilterTitle>
-                        <FilterSize onChange={(e) => setSize(e.target.value)}>
-                            {product.size?.map((s) =>(
-                                <FilterSizeOption key={s}>{s}</FilterSizeOption>
+            if (!size) {
+                alert("Vui lòng chọn size!");
+            }
+            if (!color) {
+                alert("Vui lòng chọn màu sắc!");
+            }
+            if (size && color) {
+                dispatch(
+                    addProduct({ ...product, quantity, color, size })
+
+                );
+            }
+
+        }
+    };
+
+    return (
+        <Container>
+            <Announcement />
+            <Navbar />
+            <Wrapper>
+                <ImgContainer>
+                    <Image src={product.img} />
+                </ImgContainer>
+                <InfoContainer>
+                    <Title>{product.title}</Title>
+                    <Description>{product.description}</Description>
+                    <Price>{formatVND(product.price)}</Price>
+                    <FilterContainer>
+                        <Filter>
+                            <FilterTitle>Màu sắc:</FilterTitle>
+                            {product.color?.map((c) => (
+                                <div key={c} className={`radio-color ${c === color ? 'active' : ''}`} style={{ backgroundColor: c }}
+                                    onClick={() => setColor(c)}
+                                >
+
+                                </div>
                             ))}
-                        </FilterSize>
-                    </Filter>
-                </FilterContainer>
-                <AddContainer>
-                    <AmountContainer>
-                        <Remove onClick={() => handleQuantity("dec")} />
-                        <Amount>{quantity}</Amount>
-                        <Add  onClick={() => handleQuantity("inc")} />
-                    </AmountContainer>
-                    <FavoriteBorderOutlined />
-                    <Button onClick={handleClick}>Thêm vào giỏ hàng</Button>
-                    
-                </AddContainer>
-                
-            </InfoContainer>
-        </Wrapper>
-        <Wrapper>
-            <Comment>
+                        </Filter>
 
-            </Comment>
-        </Wrapper>
-        <Footer />
-    </Container>
-  )
+                        <Filter>
+                            <FilterTitle>Size:</FilterTitle>
+                            <FilterSize onChange={(e) => setSize(e.target.value)}>
+                                <FilterSizeOption >Chọn size</FilterSizeOption>
+
+                                {product.size?.map((s) => (
+                                    <FilterSizeOption key={s}>{s}</FilterSizeOption>
+
+                                ))}
+                            </FilterSize>
+                        </Filter>
+                    </FilterContainer>
+                    <AddContainer>
+                        <AmountContainer>
+                            <Remove onClick={() => handleQuantity("dec")} />
+                            <Amount>{quantity}</Amount>
+                            <Add onClick={() => handleQuantity("inc")} />
+                        </AmountContainer>
+                        <FavoriteBorderOutlined   onClick={()=> favorites(product._id)} style={{cursor: "pointer"}} />
+                        <Button onClick={handleClick}>Thêm vào giỏ hàng</Button>
+
+                    </AddContainer>
+
+                </InfoContainer>
+            </Wrapper>
+            <Wrapper>
+                <Comment>
+
+                </Comment>
+            </Wrapper>
+            <Footer />
+        </Container>
+    )
 }
 
 export default Product

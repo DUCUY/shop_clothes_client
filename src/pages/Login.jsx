@@ -1,9 +1,11 @@
 import styled from "styled-components";
 import { mobile } from "../responsive";
 import { useState } from "react";
-import { login } from "../redux/apiCall";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
+import { publicRequest } from "../requestMethods";
+import { loginSuccess } from "../redux/userRedux";
+
 
 
 
@@ -81,13 +83,30 @@ const Error = styled.span`
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const { isFetching } = useSelector((state) => state.user);
+    const [errorLogin, setErrorLogin] = useState(false);
+    const next = useHistory();
     const dispatch = useDispatch();
-    const { isFetching, error } = useSelector((state) => state.user);
 
-    const handleClick = (e) => {
+
+    const handleClick = async (e) => {
         e.preventDefault();
-        login(dispatch, { email, password });
+        const formData = {email, password};
+        try {
+            const res = await publicRequest.post(`/auth/login`, formData);
+            if( res.status !== 200){
+                setErrorLogin(true);
+            } else {
+                dispatch(loginSuccess(res.data));
+                next.push('/');
+
+            }
+
+        } catch (error) {
+
+        };
     };
+
 
   return (
     <Container>
@@ -95,6 +114,7 @@ const Login = () => {
             <Tilte>Đăng Nhập</Tilte>
             <Form>
                 <Input placeholder="email" 
+                    type="email"
                     onChange={(e) => setEmail(e.target.value)} />
                 <Input placeholder="password"
                     type="password" 
@@ -103,10 +123,7 @@ const Login = () => {
                 <Button onClick={handleClick} disabled={isFetching}>
                     Đăng Nhập
                 </Button>
-                 {error && <Error>Nhập thông tin bị sai hoặc còn thiếu xót!</Error>}
-                {/* <Link >
-                    
-                </Link> */}
+                 {errorLogin && <Error>Nhập thông tin bị sai hoặc còn thiếu xót!</Error>}
                 <Div>Bạn đã quên mật khẩu của mình?</Div>
                 <Link to="/register">
                     <Div>Đăng ký tài khoản mới.</Div>

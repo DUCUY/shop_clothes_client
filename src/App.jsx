@@ -11,22 +11,26 @@ import Product from "./pages/Product";
 import ProductList from "./pages/ProductList";
 import Register from "./pages/Register";
 import Contact from "./pages/Contact";
-import Aboutus from "./pages/Aboutus";
+import About from "./pages/About";
+import Favorites from "./pages/Favorites";
 import { useSelector } from "react-redux";
-
+import { Toaster } from 'react-hot-toast';
+import CheckOut from "./pages/CheckOut";
 
 
 function App() {
   const user = useSelector((state) => state.user.currentUser);
 
   return (
+    <>
+    <Toaster position="top-center"/>
     <Router>
       <Switch>
         <Route exact path="/">
           <Home />
         </Route>
         <Route  path="/about">
-          <Aboutus />
+          <About />
         </Route>
         <Route  path="/contact">
           <Contact/>
@@ -43,12 +47,20 @@ function App() {
         <Route path="/cart">
           <Cart />
         </Route>
+        <Route path="/favorites">
+          <Favorites />
+        </Route>
         <Route path="/login">{user ? <Redirect to="/" /> : <Login />}</Route>
         <Route path="/register">
           {user ? <Redirect to="/login" /> : <Register />}
         </Route>
+        <Route path="/checkout">
+          <CheckOut />
+        </Route>
       </Switch>
     </Router>
+    </>
+    
   );
 };
 

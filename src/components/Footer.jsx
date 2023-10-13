@@ -1,5 +1,6 @@
 import { Facebook, Instagram, Room, Twitter, YouTube } from "@mui/icons-material"
 import { styled } from "styled-components"
+import { Link } from "react-router-dom";
 import { mobile } from '../responsive'
 
 // import { Link } from "react-router-dom"
@@ -10,24 +11,24 @@ const Container = styled.div`
     ${mobile({ flexDirection: "column" })};
 
 
-` 
+`
 const Left = styled.div`
     flex: 1;
     display: flex;
     flex-direction: column;
     padding: 20px;
 `
-const Logo =  styled.h1``
+const Logo = styled.h1``
 
-const Description =  styled.p`
+const Description = styled.p`
     margin: 20px 0px;
 `
 
-const SocialContainer =  styled.div`
+const SocialContainer = styled.div`
     display: flex;
 `
 
-const SocialIcon =  styled.div`
+const SocialIcon = styled.div`
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -80,55 +81,67 @@ const Payment = styled.img`
 
 
 const Footer = () => {
-  return (
-    <Container>
-        <Left>
-            <Logo>Sports Stotes</Logo>
-            <Description>Cửa Hàng chúng tôi cung cấp đa dạng sản phẩm chất lượng cho cuộc sống năng động của bạn.</Description>
-            <SocialContainer>
-                <SocialIcon color="3B5999">
-                    <Facebook/>
-                </SocialIcon>
-                <SocialIcon color="E4405F">
-                    <Instagram/>
-                </SocialIcon>
-                <SocialIcon color="55ACEE">
-                    <Twitter/>
-                </SocialIcon>
-                <SocialIcon color="E60023">
-                    <YouTube/>
-                </SocialIcon>
-            </SocialContainer>
-        </Left>
-        <Center>
-            <Title>Danh mục</Title>
-            <List>
-                <ListItem>
-                    {/* <Link to ="" ></Link> */}
-                    Trang chủ
-                </ListItem>
-                <ListItem>Giới Thiệu</ListItem>
-                <ListItem>Sản Phẩm</ListItem>
-                <ListItem>Liên Hệ</ListItem>
-                <ListItem>Giỏ Hàng</ListItem>
-                <ListItem></ListItem>
-                <ListItem></ListItem>
-                <ListItem></ListItem>
-                <ListItem></ListItem>
+    return (
+        <Container>
+            <Left>
+                <Logo>Sports Stores</Logo>
+                <Description>Cửa Hàng chúng tôi cung cấp đa dạng sản phẩm chất lượng cho cuộc sống năng động của bạn.</Description>
+                <SocialContainer>
+                    <SocialIcon color="3B5999">
+                        <Facebook />
+                    </SocialIcon>
+                    <SocialIcon color="E4405F">
+                        <Instagram />
+                    </SocialIcon>
+                    <SocialIcon color="55ACEE">
+                        <Twitter />
+                    </SocialIcon>
+                    <SocialIcon color="E60023">
+                        <YouTube />
+                    </SocialIcon>
+                </SocialContainer>
+            </Left>
+            <Center>
+                <Title>Danh mục</Title>
+                <List>
+                    <ListItem>
+                        <Link to="/" style={{ textDecoration: 'none', color: 'black' }}>
+                            Trang chủ
+                        </Link>
+                    </ListItem>
+                    <ListItem>
+                        <Link to="/about" style={{ textDecoration: 'none', color: 'black' }}>
+                            Giới Thiệu
+                        </Link>
+                    </ListItem>
+                    <ListItem>
+                        <Link to="/products" style={{ textDecoration: 'none', color: 'black' }}>
+                            Sản Phẩm
+                        </Link>
+                    </ListItem>
+                    <ListItem>
+                        <Link to="/contact" style={{ textDecoration: 'none', color: 'black' }}>
+                            Liên Hệ
+                        </Link>
+                    </ListItem>
+                    <ListItem>
+                        <Link to="/cart" style={{ textDecoration: 'none', color: 'black' }}>
+                            Giỏ Hàng
+                        </Link>
+                    </ListItem>
+                </List>
+            </Center>
 
-            </List>
-        </Center>
+            <Right>
+                <Title>Liên Hệ</Title>
+                <ContactItem>Hotline: 1900 333 444</ContactItem>
+                <ContactItem>Email: sports@gmail.com</ContactItem>
+                <ContactItem><Room />Địa chỉ: Đường 3/2, Quận Ninh Kiều, TP.Cần Thơ </ContactItem>
+                <Payment src="https://i.ibb.co/Qfvn4z6/payment.png" />
 
-        <Right>
-            <Title>Liên Hệ</Title>
-            <ContactItem>Hotline: 1900 333 444</ContactItem>
-            <ContactItem>Email: sports@gmail.com</ContactItem>
-            <ContactItem><Room />Địa chỉ: Đường 3/2, Quận Ninh Kiều, TP.Cần Thơ </ContactItem>
-            <Payment src="https://i.ibb.co/Qfvn4z6/payment.png" />
-
-        </Right>
-    </Container>
-  )
+            </Right>
+        </Container>
+    )
 }
 
 export default Footer

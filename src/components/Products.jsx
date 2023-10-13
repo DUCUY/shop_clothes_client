@@ -3,6 +3,8 @@ import { styled } from "styled-components";
 import Product from "./Product";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useSelector } from "react-redux";
+import { publicRequest } from "../requestMethods";
 
 const Container = styled.div`
     padding: 20px;  
@@ -15,6 +17,10 @@ const Container = styled.div`
 const Products = ({ cat, filters, sort }) => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [favoriteProducts, setFavoriteProducts] = useState([]);
+  const iduser = useSelector(state => state.user.currentUser)?._id;
+
+
 
   useEffect(() => {
     const getProducts = async () => {
@@ -31,7 +37,8 @@ const Products = ({ cat, filters, sort }) => {
   }, [cat]);
 
   useEffect(() => {
-    cat &&
+    // cat &&
+    if (filters)
       setFilteredProducts(
         products.filter((item) =>
           Object.entries(filters).every(([key, value]) =>
@@ -39,7 +46,7 @@ const Products = ({ cat, filters, sort }) => {
           )
         )
       );
-  }, [products, cat, filters]);
+  }, [products, filters]);
 
   useEffect(() => {
     if (sort === "macdinh") {
@@ -57,13 +64,27 @@ const Products = ({ cat, filters, sort }) => {
     }
   }, [sort]);
 
+  useEffect(() => {
+    const re = async () =>{
+      const res =  await publicRequest.get(`users/favorites/${iduser}`);
+      const idFavorites = res.data.favoriteProduct.map((item) => item._id)
+      setFavoriteProducts(idFavorites);
+    };
+    if (iduser){
+      re();
+    }
+      
+  }, [iduser]);
+
+
+
   return (
     <Container>
-        { cat 
-            ? filteredProducts.map((item) => <Product item={item} key={item.id} />)
+        { filters
+            ? filteredProducts.map((item) => <Product item={item} key={item.id} favorite={favoriteProducts.includes(item._id)} />)
             : products
-              .slice(0, 12)
-              .map((item) => <Product item={item} key={item.id}/>)
+              .slice(0, 100)
+              .map((item) => <Product item={item} key={item.id} favorite={favoriteProducts.includes(item._id)}/>)
           }
     </Container>
   )

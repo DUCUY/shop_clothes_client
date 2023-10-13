@@ -46,11 +46,11 @@ const Select = styled.select`
 //     font-size: 15px;
 
 // `
-const Wrapper = styled.div`
-    display: block;
-    justify-content: center;
+// const Wrapper = styled.div`
+//     display: block;
+//     justify-content: center;
     
-`
+// `
 
 const Option = styled.option``
 
@@ -58,16 +58,17 @@ const ProductList = () => {
     const location = useLocation();
     const cat = location.pathname.split("/")[2];
     const [filters, setFilters] = useState({});
-    const [sort, setSort] = useState("");
-
+    const [sort, setSort] = useState("macdinh");
+  
 
     const handleFilters = (e) => {
-        const value = e.target.value;
-        setFilters({
-            ...filters,
-            [e.target.name]: value,
-        });
+      const value = e.target.value;
+      setFilters({
+        ...filters,
+        [e.target.name]: value,
+      });
     };
+  
   return (
     <Container>
         <Announcement />
@@ -78,9 +79,15 @@ const ProductList = () => {
                 
             </Filter>
             <Filter>
-                <FilterText>Product List:</FilterText>
+                <FilterText>Filters:</FilterText>
+                <Select name="categories"  onChange={handleFilters}>
+                    <Option >Categories</Option>
+                    <Option value="thethao">Thể Thao</Option>
+                    <Option value="bongda">Bóng Đá</Option>
+                    <Option value="thidau">Thi Đấu</Option>
+                </Select>
                 <Select name="color" onChange={handleFilters}>
-                    <Option disabled >Color</Option>
+                    <Option  >Color</Option>
                     <Option>red</Option>
                     <Option>white</Option>
                     <Option>black</Option>
@@ -88,7 +95,7 @@ const ProductList = () => {
                     <Option>blue</Option>
                 </Select>
                 <Select name="size" onChange={handleFilters}>
-                    <Option disabled  >Size</Option>
+                    <Option  >Size</Option>
                     <Option>XS</Option>
                     <Option>S</Option>
                     <Option>M</Option>
@@ -106,15 +113,7 @@ const ProductList = () => {
             
         </FilterContainer>
         <FilterContainer>
-            <Filter>
-                1FaxWECV
-            </Filter>
-            <Filter>
-                <Wrapper>
-                <Products cat={cat} filters={filters} sort={sort} />
-                {/* <Price>{product.price} VND</Price> */}
-                </Wrapper>
-            </Filter>
+            <Products cat={cat} filters={filters} sort={sort} />
         </FilterContainer>
         
         <Footer />

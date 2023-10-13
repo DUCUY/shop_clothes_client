@@ -5,9 +5,11 @@ import styled from 'styled-components';
 import { Add, Delete, Remove } from '@mui/icons-material';
 import { mobile } from '../responsive';
 import { useSelector } from "react-redux";
-import { useState } from 'react';
-import { removeProduct } from "../redux/cartRedux";
+import { minusProduct, plusProduct, removeProduct } from "../redux/cartRedux";
 import { useDispatch } from "react-redux";
+import { Link } from 'react-router-dom/cjs/react-router-dom.min';
+import formatVND from '../util/formatVND';
+
 
 
 
@@ -20,8 +22,11 @@ const Wrapper = styled.div`
 `
 
 const Title = styled.h1`
-    font-weight: 300;
+    font-weight: 500;
+    font-size: 25px;
     text-align: center;
+    font-style: italic;
+
 `
 
 const Top = styled.div`
@@ -50,6 +55,8 @@ const TopText = styled.span`
     text-decoration: underline;
     cursor: pointer;
     margin: 0px 10px;
+    font-style: italic;
+
 `;
 
 const Bottom = styled.div`
@@ -88,12 +95,10 @@ const Details = styled.div`
 
 const ProductName = styled.span``;
 
-const ProductId = styled.span``;
+// const ProductId = styled.span``;
 
 const ProductColor = styled.div`
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
+    
 `;
 
 const ProductSize = styled.span``;
@@ -163,94 +168,94 @@ const Button = styled.button`
     background-color: black;
     color: white;
     font-weight: 600;
+    cursor: pointer;
 `;
 
 const Cart = () => {
     const cart = useSelector((state) => state.cart);
     const dispatch = useDispatch();
 
+    const handlePlusProduct = (idProduct) => {
+        dispatch(plusProduct(idProduct))
+    };
+    const handleMinusProduct = (idProduct) => {
+        dispatch(minusProduct(idProduct))
+    };
 
-    const [quantity, setQuantity] = useState(1);
 
-    const handleQuantity = (type) => {
-        if (type === "dec") {
-          quantity > 1 && setQuantity(quantity - 1);
+    const handleRemoveClick = (idProduct) => {
+        dispatch(removeProduct(idProduct));
+    };
 
-        } else {
-          setQuantity(quantity + 1);
-        }
-      };
+    return (
+        <Container>
+            <Announcement />
+            <Navbar />
+            <Wrapper>
+                <Title>Giỏ Hàng Của Bạn</Title>
+                <Top>
+                    <Link to="/products">
+                        <TopButton>Tiếp tục mua hàng</TopButton>
+                    </Link>
 
-      const handleRemoveClick = (productId) => {
-        dispatch(removeProduct({ id: productId }));
-      };
+                    <TopTexts>
+                        <TopText>Giỏ hàng  {cart.quantity}</TopText>
+                        <TopText>Danh sách yêu thích</TopText>
+                    </TopTexts>
+                    <Link to="/checkout">
+                        <TopButton type="filled">Thanh toán </TopButton>
+                    </Link>
+                </Top>
+                <Bottom>
+                    <Info>
+                        {cart.products.map((product, index) => {
+                            const total = product.price * product.quantity
+                            return <Product key={index}>
+                                <ProductDetail>
+                                    <Image src={product.img} />
+                                    <Details>
+                                        <ProductName><b>Sản Phẩm: </b>{product.title} </ProductName>
+                                        <ProductColor ><b>Color: </b>{product.color}</ProductColor>
+                                        <ProductSize><b>Size: </b>{product.size}</ProductSize>
+                                    </Details>
+                                </ProductDetail>
+                                <PriceDetail>
+                                    <ProductAmountContainer>
+                                        <Remove onClick={() => handleMinusProduct(product._id)} style={{ cursor: 'pointer' }} />
+                                        <ProductAmount>{product.quantity}</ProductAmount>
+                                        <Add onClick={() => handlePlusProduct(product._id)} style={{ cursor: 'pointer' }} />
+                                        <Delete onClick={() => handleRemoveClick(product._id)} style={{ cursor: 'pointer' }} />
+                                    </ProductAmountContainer>
+                                    <ProductPrice>{formatVND(total)}</ProductPrice>
+                                </PriceDetail>
+                            </Product>
+                        })}
+                        <Hr />
 
-  return (
-    <Container>
-        <Announcement />
-        <Navbar />
-        <Wrapper>
-            <Title>Giỏ Hàng Của Bạn</Title>
-            <Top>
-                <TopButton>Tiếp tục mua hàng</TopButton> 
-                <TopTexts>
-                    <TopText>Giỏ hàng({quantity})</TopText>
-                    <TopText>Danh sách yêu thích</TopText>
-                </TopTexts>
-                <TopButton type="filled">Thanh toán </TopButton>
-            </Top>
-            <Bottom>
-                  <Info>
-                    {cart.products.map((product) => (
-                    <Product>
-                        <ProductDetail>
-                            <Image src={product.img} />    
-                            <Details>
-                                <ProductName><b>Sản Phẩm:</b>{product.title} </ProductName>
-                                <ProductId><b>ID:</b> {product._id}</ProductId>
-                                <ProductColor color={product.color} />
-                                <ProductSize><b>Size:</b>{product.size}</ProductSize>
-                            </Details>
-                        </ProductDetail> 
-                        <PriceDetail>
-                            <ProductAmountContainer>
-                                <Remove onClick={() => handleQuantity("dec")} style={{cursor : 'pointer'}} />
-                                <ProductAmount>{quantity}</ProductAmount>
-                                <Add onClick={() => handleQuantity("inc")}  style={{cursor : 'pointer'}} />
-                                <Delete onClick={ handleRemoveClick}  style={{cursor : 'pointer'}} />
-                            </ProductAmountContainer>
-                            <ProductPrice>{product.price * product.quantity} VND</ProductPrice>
-                        </PriceDetail>
-                    </Product>
-                    ))}
-                    <Hr />
-                      
-                  </Info>
-                <Summary>
-                    <SummaryTitle>Đơn Hàng</SummaryTitle>
-                    <SummaryItem>
-                        <SummaryItemText>Tổng tiền</SummaryItemText>
-                        <SummaryItemPrice>{cart.total} VND</SummaryItemPrice>
-                    </SummaryItem>
-                    <SummaryItem>
-                        <SummaryItemText>Phí ship</SummaryItemText>
-                        <SummaryItemPrice>50.000 VND</SummaryItemPrice>
-                    </SummaryItem>
-                    <SummaryItem>
-                        <SummaryItemText>Mã giảm giá</SummaryItemText>
-                        <SummaryItemPrice>-50.000 VND</SummaryItemPrice>
-                    </SummaryItem>
-                    <SummaryItem>
-                        <SummaryItemText type="total">Tổng cộng</SummaryItemText>
-                        <SummaryItemPrice>{cart.total} VND</SummaryItemPrice>
-                    </SummaryItem>
-                    <Button>Thanh Toán</Button>
-                </Summary>
-            </Bottom>
-        </Wrapper>
-        <Footer />
-    </Container>
-  )
+                    </Info>
+                    <Summary>
+                        <SummaryTitle>Đơn Hàng</SummaryTitle>
+                        <SummaryItem>
+                            <SummaryItemText>Tổng tiền</SummaryItemText>
+                            <SummaryItemPrice>{formatVND(cart.total)}</SummaryItemPrice>
+                        </SummaryItem>
+                        <SummaryItem>
+                            <SummaryItemText>Phí ship</SummaryItemText>
+                            <SummaryItemPrice>{formatVND(cart.total >= 300000 ? '0' : '30000')}</SummaryItemPrice>
+                        </SummaryItem>
+                        <SummaryItem>
+                            <SummaryItemText type="total">Tổng cộng</SummaryItemText>
+                            <SummaryItemPrice>{formatVND(cart.total > 300000 ? cart.total + 30000 : cart.total)}</SummaryItemPrice>
+                        </SummaryItem>
+                        <Link to="/checkout">
+                        <Button>Thanh Toán</Button>
+                        </Link>
+                    </Summary>
+                </Bottom>
+            </Wrapper>
+            <Footer />
+        </Container>
+    )
 }
 
 export default Cart

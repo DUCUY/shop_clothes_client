@@ -1,6 +1,9 @@
-import { FavoriteBorderOutlined, SearchOutlined, ShoppingCartOutlined } from "@mui/icons-material"
+import { Favorite, FavoriteBorder, SearchOutlined } from "@mui/icons-material"
+import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
 import { styled } from "styled-components"
+import {publicRequest} from "../requestMethods"
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min"
 
 const Info = styled.div`
     opacity: 0;
@@ -62,26 +65,43 @@ const Icon = styled.div`
 
 
 
-const Product = ({ item }) => {
+const Product = ({ item, favorite }) => {
+    const next = useHistory();
+    const iduser = useSelector(state => state.user.currentUser)?._id;
+    const favorites =  async (id) => {
+        if( !iduser ){
+            next.push('/login');
+        }else {
+            await publicRequest.post(`users/favorites/${iduser}`, {productId: id});
+
+        }
+    }
+
+
     return (
         <Container>
             <Circle />
+            
             <Image src={item.img} />
-            <Info>
+            <Info>     
                 <Icon>
-                    <ShoppingCartOutlined />
-                </Icon>
-                
-                <Icon>
-                    <Link to={`/product/${item._id}`}>
+                    <Link to={`/product/${item._id}`} style={{ textDecoration: 'none', color: 'black' }}>
                         <SearchOutlined />
                     </Link>
                 </Icon>
 
-                <Icon>
-                    <FavoriteBorderOutlined />
+                <Icon onClick={()=> favorites(item._id)}>
+                    {favorite ? <Favorite color="error"/> : <FavoriteBorder /> }
                 </Icon>
+
+
             </Info>
+            {/* <Price>{item.price.toLocaleString('vi', {style : 'currency', currency : 'VND'})}</Price> */}
+
+            {/* <Info>
+
+            </Info> */}
+            
         </Container>
     )
 }
