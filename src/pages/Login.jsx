@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import { publicRequest } from "../requestMethods";
 import { loginSuccess } from "../redux/userRedux";
+import toast from "react-hot-toast"
 
 
 
@@ -96,10 +97,13 @@ const Login = () => {
             const res = await publicRequest.post(`/auth/login`, formData);
             if( res.status !== 200){
                 setErrorLogin(true);
+            toast.error('Đăng nhập thất bại!')
+
             } else {
                 dispatch(loginSuccess(res.data));
                 next.push('/');
-
+                toast.success('Đăng nhập thành công!')
+                console.log(res.data);
             }
 
         } catch (error) {
@@ -113,10 +117,10 @@ const Login = () => {
         <Wrapper>
             <Tilte>Đăng Nhập</Tilte>
             <Form>
-                <Input placeholder="email" 
+                <Input placeholder="Email" 
                     type="email"
                     onChange={(e) => setEmail(e.target.value)} />
-                <Input placeholder="password"
+                <Input placeholder="Mật khẩu"
                     type="password" 
                     onChange={(e) => setPassword(e.target.value)}
                 />

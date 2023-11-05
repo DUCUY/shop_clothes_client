@@ -2,10 +2,14 @@ import styled from "styled-components"
 import Navbar from '../components/Navbar'
 import Announcement from '../components/Announcement'
 import Footer from "../components/Footer"
-import Products from "../components/Products"
+// import Products from "../components/Products"
 import { mobile } from "../responsive"
 import { useLocation } from "react-router";
-import { useState } from "react"
+import { useEffect, useState } from "react"
+// import { useParams } from "react-router-dom/cjs/react-router-dom.min"
+import { publicRequest, userRequest } from "../requestMethods"
+import Product from "../components/Product"
+import { useSelector } from "react-redux"
 
 
 
@@ -54,26 +58,65 @@ const Select = styled.select`
 
 const Option = styled.option``
 
-const ProductList = () => {
+
+const Search = () => {
     const location = useLocation();
-    const cat = location.pathname.split("/")[2];
+    const [data, setData] = useState([]);
+    const [favoriteProducts, setFavoriteProducts] = useState([]);
     const [filters, setFilters] = useState({});
     const [sort, setSort] = useState("macdinh");
+    const iduser = useSelector(state => state.user.currentUser)?._id;
+    const parts = location.search.split('=');
+    const keyword = parts[1];
+ 
 
 
-    const handleFilters = (e) => {
+    useEffect(() => {
+        const a = async () => {
+            const res = await publicRequest.post('products/search', { keyword: normalizeWord(keyword) });
+            if (res.data.status === 'success') {
+                setData(res.data.result);
+                console.log(res.data);
+            }
+        }
+        if (keyword !== '') {
+            a();
+        }
+    }, [keyword]);
+    console.log(data);
+
+    function normalizeWord(keyword) {
+        if (!keyword) return ''
+        return keyword
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    useEffect(() => {
+        const re = async () =>{
+          const res =  await userRequest.get(`users/favorites/${iduser}`);
+          const idFavorites = res.data.favoriteProduct.map((item) => item._id)
+          setFavoriteProducts(idFavorites);
+        };
+        if (iduser){
+          re();
+        }
+          
+      }, [iduser]);
+
+      const handleFilters = (e) => {
         const value = e.target.value;
         setFilters({
             ...filters,
             [e.target.name]: value,
         });
     };
-
+    
     return (
         <Container>
             <Announcement />
             <Navbar />
-
             <FilterContainer>
                 <Filter>
                     <FilterText>Filters:</FilterText>
@@ -88,10 +131,9 @@ const ProductList = () => {
                         <Option value="kinh">Kính</Option>
                         <Option value="non">Nón</Option>
                         <Option value="balo">Balo</Option>
-                        
                     </Select>
                     <Select name="color" onChange={handleFilters}>
-                        <Option>Color</Option>
+                        <Option  >Color</Option>
                         <Option>red</Option>
                         <Option>white</Option>
                         <Option>black</Option>
@@ -99,7 +141,7 @@ const ProductList = () => {
                         <Option>blue</Option>
                     </Select>
                     <Select name="size" onChange={handleFilters}>
-                        <Option>Size</Option>
+                        <Option  >Size</Option>
                         <Option>S</Option>
                         <Option>M</Option>
                         <Option>L</Option>
@@ -118,9 +160,15 @@ const ProductList = () => {
                 </Filter>
 
             </FilterContainer>
-            <FilterContainer>
-                <Products cat={cat} filters={filters} sort={sort} />
-            </FilterContainer>
+            <div>
+
+            {
+                data.map((item) => <Product item={item} key={item.id} favorite={favoriteProducts.includes(item._id)} />)
+
+            }
+            </div>
+
+          
 
             <Footer />
 
@@ -128,4 +176,4 @@ const ProductList = () => {
     )
 }
 
-export default ProductList
+export default Search

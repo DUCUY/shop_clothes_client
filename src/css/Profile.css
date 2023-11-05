@@ -1,0 +1,36 @@
+.wrapperInputs{
+    border: 1px solid black;
+    margin-top: 30px;
+    margin-left: 40px;
+    margin-right: 40px;
+    margin-bottom: 30px;
+
+}
+
+.wrapperFormInputs{
+    margin-top: 30px;
+    margin-left: 40px;
+    margin-right: 40px;
+    margin-bottom: 30px;
+
+}
+
+.titleForm{
+    display: flex;
+    margin: 10px;
+    justify-content: center;
+    align-items: center;
+    font-style: italic;
+    font-weight: 500;
+    
+}
+
+.titleOrder{
+    display: flex;
+    margin: 10px;
+    justify-content: center;
+    align-items: center;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 20px;
+}

@@ -5,11 +5,19 @@ import styled from 'styled-components';
 import { Add, Delete, Remove } from '@mui/icons-material';
 import { mobile } from '../responsive';
 import { useSelector } from "react-redux";
-import { minusProduct, plusProduct, removeProduct } from "../redux/cartRedux";
+import { minusProduct, plusProduct, removeProduct, updateCart } from "../redux/cartRedux";
 import { useDispatch } from "react-redux";
-import { Link } from 'react-router-dom/cjs/react-router-dom.min';
+import { Link } from 'react-router-dom';
 import formatVND from '../util/formatVND';
-
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+import Row from 'react-bootstrap/Row';
+import { useEffect, useState } from 'react';
+// import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+import { userRequest, publicRequest } from "../requestMethods";
+import toast from 'react-hot-toast';
+import { PayPalButton } from "react-paypal-button-v2";
 
 
 
@@ -173,7 +181,15 @@ const Button = styled.button`
 
 const Cart = () => {
     const cart = useSelector((state) => state.cart);
+    // const change = useSelector((state) => state.cart.change);
+    const [inputs, setInputs] = useState({});
+    const [show, setShow] = useState(false);
+    const [productSelect, setProductSelect] = useState([]);
+    const [total, setTotal] = useState(0);
+    const [totalAndShip, setTotalAndShip] = useState(0);
+    const [sdkReady, setSdkReady] = useState(false);
     const dispatch = useDispatch();
+    const currentUser = useSelector((state) => state.user.currentUser);
 
     const handlePlusProduct = (idProduct) => {
         dispatch(plusProduct(idProduct))
@@ -182,10 +198,136 @@ const Cart = () => {
         dispatch(minusProduct(idProduct))
     };
 
-
-    const handleRemoveClick = (idProduct) => {
-        dispatch(removeProduct(idProduct));
+    const handleRemoveClick = (state) => {
+        dispatch(removeProduct(state));
     };
+
+    const handleChange = (e) => {
+        setInputs((prev) => {
+            return { ...prev, [e.target.name]: e.target.value };
+        });
+    };
+
+    // const handleClick = (e) => {
+    //     e.preventDefault();
+    //     const payload = {
+    //         ...inputs,
+    //         username: inputs.username ? inputs.username : currentUser.username
+    //     }
+
+    // };
+
+    useEffect(() => {
+        let missProduct = cart.products.filter((cartItem) => {
+            let check = productSelect.find((product) => product._id === cartItem._id && product.size === cartItem.size && product.color === cartItem.color);
+            if (!check) {
+                return cartItem;
+            }
+        })
+        let missPrice = missProduct.reduce((acc, product) => acc + product.price * product.quantity, 0)
+        let total = cart.total - missPrice;
+        setTotal(total);
+
+        if (total > 300000) {
+            setTotalAndShip(total);
+        } else if (total > 0) {
+            setTotalAndShip(total + 30000);
+
+        } else if (total === 0 && cart.total > 300000) {
+            setTotal(cart.total);
+            setTotalAndShip(cart.total);
+
+        } else if (total === 0 && cart.total < 300000) {
+            setTotal(cart.total);
+            setTotalAndShip(cart.total + 30000);
+        }
+
+    }, [productSelect, cart.total]);
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
+    const handleSelect = (product) => {
+        const check = productSelect.find((item) => item._id === product._id && product.size === item.size && product.color === item.color);
+
+        if (check) {
+            let products = productSelect.filter((item) => item._id !== product._id || product.size !== item.size || product.color !== item.color)
+            setProductSelect(products);
+        } else {
+            setProductSelect([...productSelect, product]);
+        }
+    }
+
+    const handleOrder = async () => {
+        let amount = 0;
+        let products = productSelect.map((item) => {
+            amount += item.quantity * item.price;
+            return {
+                productId: item._id,
+                quantity: item.quantity,
+                size: item.size,
+                color: item.color,
+                productName: item.title,
+                img: item.img
+            }
+        })
+
+        let payload = {
+            userId: currentUser._id,
+            products,
+            amount,
+            payments: inputs.payments,
+            username: inputs?.username,
+            phone: inputs?.phone,
+            address: inputs?.address
+
+        };
+        const res = await userRequest.post(`orders/`, payload);
+
+        if (res.data.status === "success") {
+            toast.success("Đặt hàng thành công.");
+            let newCart = cart.products.filter((cartItem) => {
+                if (productSelect.find((product) => product._id === cartItem._id && product.size === cartItem.size && product.color === cartItem.color)) {
+                    return false
+                }
+                return true
+            })
+            let total = newCart.reduce((acc, product) => acc + product.price * product.quantity, 0)
+
+            dispatch(updateCart({ total: total, products: newCart, quantity: newCart.length }));
+        } else {
+            toast.error("Đặt hàng không thành công!");
+        }
+        handleClose();
+    };
+
+    useEffect(() => {
+        setInputs({
+            username: currentUser?.username,
+            phone: currentUser?.phone,
+            address: currentUser?.address
+        });
+    }, [currentUser]);
+
+    const addPaypalScript = async () => {
+        const data = await publicRequest.get("payment/config");
+        const script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = `https://www.paypal.com/sdk/js?client-id=${data}`;
+        script.async = true;
+        script.onload = () => {
+            setSdkReady(!sdkReady);
+        }
+        document.body.appendChild(script);
+    };
+
+    useEffect(() => {
+        if (!window.paypal) {
+            addPaypalScript()
+        } else {
+            setSdkReady(true);
+        }
+    }, [])
 
     return (
         <Container>
@@ -212,6 +354,7 @@ const Cart = () => {
                             const total = product.price * product.quantity
                             return <Product key={index}>
                                 <ProductDetail>
+                                    <Form.Check onClick={() => handleSelect(product)} />
                                     <Image src={product.img} />
                                     <Details>
                                         <ProductName><b>Sản Phẩm: </b>{product.title} </ProductName>
@@ -221,10 +364,10 @@ const Cart = () => {
                                 </ProductDetail>
                                 <PriceDetail>
                                     <ProductAmountContainer>
-                                        <Remove onClick={() => handleMinusProduct(product._id)} style={{ cursor: 'pointer' }} />
+                                        <Remove onClick={() => handleMinusProduct({ _id: product._id, size: product.size, color: product.color })} style={{ cursor: 'pointer' }} />
                                         <ProductAmount>{product.quantity}</ProductAmount>
-                                        <Add onClick={() => handlePlusProduct(product._id)} style={{ cursor: 'pointer' }} />
-                                        <Delete onClick={() => handleRemoveClick(product._id)} style={{ cursor: 'pointer' }} />
+                                        <Add onClick={() => handlePlusProduct({ _id: product._id, size: product.size, color: product.color })} style={{ cursor: 'pointer' }} />
+                                        <Delete onClick={() => handleRemoveClick({ _id: product._id, size: product.size, color: product.color })} style={{ cursor: 'pointer' }} />
                                     </ProductAmountContainer>
                                     <ProductPrice>{formatVND(total)}</ProductPrice>
                                 </PriceDetail>
@@ -236,25 +379,106 @@ const Cart = () => {
                     <Summary>
                         <SummaryTitle>Đơn Hàng</SummaryTitle>
                         <SummaryItem>
-                            <SummaryItemText>Tổng tiền</SummaryItemText>
-                            <SummaryItemPrice>{formatVND(cart.total)}</SummaryItemPrice>
+                            <SummaryItemText>Tổng tiền hàng</SummaryItemText>
+                            <SummaryItemPrice>{formatVND(total)}</SummaryItemPrice>
                         </SummaryItem>
                         <SummaryItem>
-                            <SummaryItemText>Phí ship</SummaryItemText>
-                            <SummaryItemPrice>{formatVND(cart.total >= 300000 ? '0' : '30000')}</SummaryItemPrice>
+                            <SummaryItemText>Phí vận chuyển</SummaryItemText>
+                            <SummaryItemPrice>{formatVND(total >= 300000 ? '0' : '30000')}</SummaryItemPrice>
                         </SummaryItem>
                         <SummaryItem>
-                            <SummaryItemText type="total">Tổng cộng</SummaryItemText>
-                            <SummaryItemPrice>{formatVND(cart.total > 300000 ? cart.total + 30000 : cart.total)}</SummaryItemPrice>
+                            <SummaryItemText type="total">Tổng thanh toán</SummaryItemText>
+                            <SummaryItemPrice>{formatVND(totalAndShip)}</SummaryItemPrice>
+
                         </SummaryItem>
-                        <Link to="/checkout">
-                        <Button>Thanh Toán</Button>
-                        </Link>
+
+                        <Button onClick={() => {
+                            if (productSelect.length > 0) {
+                                handleShow()
+                            } else {
+                                toast.error("Vui lòng chọn sản phẩm.")
+                            }
+                        }} >Mua hàng</Button>
+
                     </Summary>
                 </Bottom>
+
+                <Modal show={show} onHide={handleClose}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Thông tin đơn hàng</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form >
+                            <Row className="mb-3">
+                                <Form.Group as={Col} controlId="formGridEmail">
+                                    <Form.Label>Tên người nhận</Form.Label>
+                                    <Form.Control type="text" name='username' placeholder="" value={inputs.username} onChange={handleChange} />
+                                </Form.Group>
+                                <Form.Group as={Col} controlId="formGridPassword">
+                                    <Form.Label>Số điện thoại</Form.Label>
+                                    <Form.Control type="text" name='phone' placeholder="" onChange={handleChange} value={inputs.phone} />
+                                </Form.Group>
+                            </Row>
+
+                            <Form.Group className="mb-3" controlId="formGridAddress1">
+                                <Form.Label>Địa chỉ nhận hàng</Form.Label>
+                                <Form.Control placeholder="" name='address' onChange={handleChange} value={inputs.address} />
+                            </Form.Group>
+
+                            <Row className="mb-3">
+                                <Form.Group as={Col} controlId="formGridState" >
+                                    <Form.Label></Form.Label>
+                                    <Form.Select name='payments' onChange={handleChange} >
+                                        <option value={''}>Phương thức thanh toán</option>
+                                        <option value={'cod'}>Thanh toán khi nhận hàng</option>
+                                        <option value={'paypal'}>Thanh toán bằng paypal</option>
+                                    </Form.Select>
+                                </Form.Group>
+                            </Row>
+
+                        </Form>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleClose}>
+                            Đóng
+                        </Button>
+                        {
+                            inputs.payments === 'cod' && <Button variant="primary" onClick={handleOrder} > Đặt hàng </Button>
+                        }
+
+                        {
+                            inputs.payments === 'paypal' && (
+
+                                <div className='w-100'>
+                                    <PayPalButton
+                                        amount="100"
+                                        // shippingPreference="NO_SHIPPING" // default is "GET_FROM_FILE"
+                                        onSuccess={(details, data) => {
+                                            alert("Transaction completed by " + details.payer.name.given_name);
+
+                                            // OPTIONAL: Call your server to save the transaction
+                                            return fetch("/paypal-transaction-complete", {
+                                                method: "post",
+                                                body: JSON.stringify({
+                                                    orderID: data.orderID
+                                                })
+                                            });
+                                        }}
+                                        onError={() => {
+                                            toast.error("Transaction failed");
+                                        }}
+
+                                    />
+                                </div>
+                            )}
+
+
+                    </Modal.Footer>
+                </Modal>
             </Wrapper>
             <Footer />
         </Container>
+
     )
 }
 

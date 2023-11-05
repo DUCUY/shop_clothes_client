@@ -3,12 +3,11 @@ import { Badge } from '@mui/material'
 import React, { useState } from 'react'
 import { styled } from 'styled-components'
 import { mobile, tabled } from '../responsive'
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
-// import Sidebar from "../components/Sidebar"
-// import Button from 'react-bootstrap/Button';
 import Offcanvas from 'react-bootstrap/Offcanvas';
-
+import toast from 'react-hot-toast'
+import "../css/navbar.css";
 
 const Container = styled.div`
   height: 120px;
@@ -27,7 +26,8 @@ const Wrapper = styled.div`
 const Left = styled.div`
   flex: 1;
   display: flex;
-  text-align: center;justify-content: center;
+  text-align: center;
+  justify-content: center;
   align-items: center;
   ${tabled({
 
@@ -132,11 +132,28 @@ const MenuItemBottom = styled.div`
 const Navbar = () => {
   const quantity = useSelector(state => state.cart.quantity);
   const [show, setShow] = useState(false);
+  const [searchkeyword, setSearchKeyWord] = useState('');
+  const next = useHistory();
+  const iduser = useSelector(state => state.user.currentUser)?._id;
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const handleSearch = async () => {
+    try {
 
+      if (searchkeyword !== '') {
+        next.push(`/search?keyword=${searchkeyword}`);
+      } else {
+        toast.error('Vui lòng nhập từ khóa tìm kiếm!');
+      }
+    } catch (error) { }
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem("persist:root")
+    next.push("/login");
+  };
 
   return (
     <Container>
@@ -146,21 +163,8 @@ const Navbar = () => {
           <Offcanvas.Title>Menu</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-        <SearchContainer>
-            <Input placeholder="Search" />
-            <Buttonn type="submit">
-              <Search style={{ fontSize: '18px', color: '#555' }} />
-            </Buttonn>
-
-          </SearchContainer>
-          <MenuItemBottom>
-            <Link to="/" style={{ textDecoration: 'none', color: 'black', transition: 'all 0.3s' }}>Trang Chủ</Link>
-            <Link to="/about" style={{ textDecoration: 'none', color: 'black' }}>Giới Thiệu</Link>
-            <Link to="/products" style={{ textDecoration: 'none', color: 'black' }}>Sản Phẩm</Link>
-            <Link to="/contact" style={{ textDecoration: 'none', color: 'black' }}>Liên Hệ</Link>
-          </MenuItemBottom>
-
-          <Link to="/favorites" style={{ textDecoration: 'none', color: 'black' }} >
+          <div className='menuListIcon'>
+          <Link to="/favorites"  style={{ textDecoration: 'none', color: 'black' }} >
             <MenuItem>
               <Badge color="primary">
                 <FavoriteBorderOutlined />
@@ -175,6 +179,23 @@ const Navbar = () => {
               </Badge>
             </MenuItem>
           </Link>
+          </div>
+        
+          <SearchContainer>
+            <Input placeholder="Search" onChange={(e) => setSearchKeyWord(e.target.value)} />
+            <Buttonn type="submit">
+              <Search style={{ fontSize: '18px', color: '#555' }} />
+            </Buttonn>
+
+          </SearchContainer>
+          <MenuItemBottom className='menuList'>
+            <Link to="/" className='menuItem' style={{ textDecoration: 'none', color: 'black', transition: 'all 0.3s' }}>Trang Chủ</Link>
+            <Link to="/about" className='menuItem' style={{ textDecoration: 'none', color: 'black' }}>Giới Thiệu</Link>
+            <Link to="/products" className='menuItem' style={{ textDecoration: 'none', color: 'black' }}>Sản Phẩm</Link>
+            <Link to="/contact" className='menuItem' style={{ textDecoration: 'none', color: 'black' }}>Liên Hệ</Link>
+          </MenuItemBottom>
+
+          
         </Offcanvas.Body>
       </Offcanvas>
       <Wrapper>
@@ -189,9 +210,9 @@ const Navbar = () => {
 
 
         <Center>
-          <SearchContainer>
-            <Input placeholder="Search" />
-            <Buttonn type="submit">
+          <SearchContainer >
+            <Input placeholder="Search" onChange={(e) => setSearchKeyWord(e.target.value)} />
+            <Buttonn type="submit" onClick={handleSearch}>
               <Search style={{ fontSize: '18px', color: '#555' }} />
             </Buttonn>
 
@@ -205,11 +226,25 @@ const Navbar = () => {
         </Center>
 
         <Right>
-          <Link to="/login" style={{ textDecoration: 'none', color: 'black' }}>
-            <MenuItem>
-              <AccountCircle />
-            </MenuItem>
-          </Link>
+          <MenuItem>
+            {
+              iduser ?
+                <div className='auth-container'>
+                  <AccountCircle />
+                  <div className='auth-menuchild'>
+                    <div className="auth-menuchild-list">
+                      <div><Link className="auth-menuchild-listitem" to="/my-profile">Thông tin cá nhân</Link></div>
+                      <div><Link className="auth-menuchild-listitem" to="/my-orders">Đơn hàng của tôi</Link></div>
+                      <div><div onClick={handleLogout} >Đăng xuất</div></div>
+
+                    </div>
+                  </div>
+                </div>
+                : <Link to="/login" style={{ color: "black" }}><AccountCircle /></Link>
+            }
+
+          </MenuItem>
+        
           <Link to="/favorites" style={{ textDecoration: 'none', color: 'black' }} >
             <MenuItem>
               <Badge color="primary">
@@ -227,11 +262,25 @@ const Navbar = () => {
           </Link>
         </Right>
         <RightReponsive>
-          <Link to="/login" style={{ textDecoration: 'none', color: 'black' }}>
-            <MenuItem>
-              <AccountCircle />
-            </MenuItem>
-          </Link>
+
+          <MenuItem>
+            {
+              iduser ?
+                <div className='auth-container'>
+                  <AccountCircle />
+                  <div className='auth-menuchild'>
+                    <ul className="auth-menuchild-list">
+                      <li><Link to="/my-profile" className="auth-menuchild-listitem">Thông tin cá nhân</Link></li>
+                      <li><Link className="auth-menuchild-listitem" to="/my-orders">Đơn hàng của tôi</Link></li>
+                      <li><div onClick={handleLogout} >Đăng xuất</div></li>
+
+                    </ul>
+                  </div>
+                </div>
+                : <Link to="/login" style={{ color: "black" }}><AccountCircle /></Link>
+            }
+          </MenuItem>
+
         </RightReponsive>
 
       </Wrapper>

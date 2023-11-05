@@ -1,0 +1,54 @@
+.OrdersList{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
+}
+
+.Order{
+    width: 80%;
+    border: 1px solid black;
+    display: flex;
+    margin-right: 20px;
+    flex-direction: column;
+    background-color: aliceblue;
+
+}
+
+.OrderInfo{
+    margin-top: 10px;
+    margin-left: 20px;
+    padding: 5px;
+    font-style: italic;
+}
+
+.OrderDetail{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px
+}
+
+.OrderDetail img {
+    width: 100px;
+    height: 100px;
+    margin-right: 10px; 
+    border: 1px solid black;
+    /* margin-left: 50px; */
+    margin-right: 50px;
+  }
+
+.OrderDetailItem{
+   display: flex;
+   flex-direction: column;
+   font-style: italic;
+}
+
+.OrderPrice{
+    display: flex;
+   justify-content: end;
+   font-weight: 500;
+   font-style: italic;
+    
+}

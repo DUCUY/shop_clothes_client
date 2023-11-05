@@ -1,0 +1,79 @@
+.auth-container{
+    position: relative;
+    display: inline-block;
+}
+
+.auth-container:hover .auth-menuchild {
+    visibility: visible ;
+    opacity: 1;
+    transform: translateY(0);
+    top: 100%;
+
+}
+
+.auth-menuchild{
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 600%;
+    opacity: 0;
+    visibility: hidden;
+    background-color: white;
+    z-index: 90;
+    transition: all 0.3s ease;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.auth-menuchild::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    left: 0;
+    height: 30px;
+    width: 100%;
+    background-color: transparent;
+}
+
+.auth-menuchild-list{
+    list-style: none;
+}
+
+.auth-menuchild-list li{
+    display: flex;
+}
+
+.auth-menuchild-listitem{
+    text-decoration: none;
+    color: black;
+    margin-bottom: 10px;
+}
+
+.menuList{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 10px;   
+    background-color:#C0C0C0;
+}
+
+.menuItem{
+    display: flex;
+    margin: 5px;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    justify-content: center;
+    padding: 5px;
+}
+
+.menuItem:hover {
+    background-color: #A9A9A9;
+}
+
+.menuListIcon{
+    display: flex;
+    margin-bottom: 10px;
+    float: right;
+    /* justify-content: end; */
+}

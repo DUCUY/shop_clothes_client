@@ -1,0 +1,44 @@
+.commentContainer{
+    position: relative;
+    display:  block;
+}
+
+.commentEdit{
+    display: none;
+    position: absolute !important;
+    left: 50%;
+    top: 100%;
+    width: 100%;
+    transform: translateX(-50%);
+    z-index: 100;
+}
+
+.commentEdit.active {
+    display: block;
+}
+
+.moreComments {
+    display:  flex;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.actionIcons{
+    position: relative;
+}
+
+.menuChildAction{
+    width: 80px;
+    height: 80px;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    display: none;
+    background-color: white ;
+    border: 1px solid black;
+    
+}
+
+.actionIcons:hover .menuChildAction {
+    display: block;
+}

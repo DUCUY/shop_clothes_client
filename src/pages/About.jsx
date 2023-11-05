@@ -46,6 +46,7 @@ const Title = styled.h1`
     font-weight: 500;
     font-size: 25px;
     font-style: italic;
+    margin-top: 20px;
 
 
 `
@@ -75,8 +76,6 @@ const Bottom = styled.div`
 `
 
 const Hr = styled.hr`
-    width: 80%;
-    height: 2px;
 `
 
 const About = () => {

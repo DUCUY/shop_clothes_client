@@ -1,7 +1,7 @@
 import { Facebook, Instagram, Room, Twitter, YouTube } from "@mui/icons-material"
 import { styled } from "styled-components"
 import { Link } from "react-router-dom";
-import { mobile } from '../responsive'
+import { mobile, tabled } from '../responsive'
 
 // import { Link } from "react-router-dom"
 
@@ -9,16 +9,22 @@ const Container = styled.div`
     display: flex;
     background-color: #C0C0C0;
     ${mobile({ flexDirection: "column" })};
+    ${tabled({
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
 
+      })}
 
 `
 const Left = styled.div`
     flex: 1;
-    display: flex;
     flex-direction: column;
     padding: 20px;
 `
-const Logo = styled.h1``
+const Logo = styled.h1`
+    display: flex;
+`
 
 const Description = styled.p`
     margin: 20px 0px;

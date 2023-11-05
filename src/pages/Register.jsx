@@ -2,7 +2,7 @@ import styled from "styled-components"
 import { mobile } from "../responsive"
 import { Link,useHistory } from "react-router-dom"
 import { useState } from "react"
-import { publicRequest } from "../requestMethods"
+import { userRequest } from "../requestMethods"
 import toast from "react-hot-toast"
 
 
@@ -22,7 +22,7 @@ const Container = styled.div`
 `
 
 const Wrapper = styled.div`
-    width: 25%;
+    width: 30%;
     padding: 20px;
     background-color: white;
     ${mobile({ width: "75%" })}
@@ -31,7 +31,7 @@ const Wrapper = styled.div`
 
 const Form = styled.form`
     display: flex;
-    // flex-wrap: wrap;
+    flex-wrap: wrap;
     flex-direction: column;
 
 `
@@ -43,7 +43,7 @@ const Tilte = styled.h1`
 
 const Input = styled.input`
     flex: 1;
-    min-width: 40%;
+    m-width: 40%;
     margin: 10px 10px;
     padding: 10px;
 `
@@ -79,6 +79,8 @@ const Register = () => {
     const initializedForm = {
       username: '',
       email: '',
+      phone:'',
+      address:'',
       password: '',
       confirmPassword: ''
     };
@@ -101,7 +103,7 @@ const Register = () => {
         }
     
         try {
-          const res =  await publicRequest.post(`/auth/register`,formData);
+          const res =  await userRequest.post(`/auth/register`,formData);
           if( res.status === 200){
             setFormData(initializedForm);
             toast.success('Đăng ký thành công!')
@@ -124,25 +126,38 @@ const Register = () => {
         <Wrapper>
             <Tilte>Đăng Ký Tài Khoản</Tilte>
             <Form onSubmit={handleSubmit}>
-                <Input placeholder="username"
+                <Input placeholder="Tên người dùng"
                     type="text"
                     name="username"
                     value={formData.username}
                     onChange={handleInputChange}
                 />
-                <Input placeholder="email"
+                <Input placeholder="Email"
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
                 />
-                <Input placeholder="password" 
+                {/* <Input placeholder="Số điện thoại"
+                    type="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                /> */}
+                {/* <Input placeholder="Địa chỉ"
+                    type="address"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                /> */}
+
+                <Input placeholder="Mật khẩu" 
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
                 />
-                <Input placeholder="confirm password" 
+                <Input placeholder="Nhập lại mật khẩu" 
                     type="password"
                     name="confirmPassword"
                     value={formData.confirmPassword}

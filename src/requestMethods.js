@@ -13,14 +13,14 @@ export const publicRequest = axios.create({
 
 export const userRequest = axios.create({
     baseURL: BASE_URL,
-    header: { token: `Bearer ${TOKEN}` },
+    headers: {
+      "Content-Type": "application/json",
+      'token' : `Bearer ${TOKEN}`
+
+    },
+    
   });
 
-// export const updateFavoriteProduct = async (userId, productId) => {
-//   try {
-//     const response = await axios.patch(`users/favorites/${userId}`, { productId });
-//     return response.data;
-//   } catch (error) {
-//     throw error;
-//   }
-// };
+  // headers: { token: `Bearer ${TOKEN}` },
+
+

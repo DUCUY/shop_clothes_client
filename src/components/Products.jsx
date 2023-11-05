@@ -4,7 +4,7 @@ import Product from "./Product";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { publicRequest } from "../requestMethods";
+import { userRequest } from "../requestMethods";
 
 const Container = styled.div`
     padding: 20px;  
@@ -66,7 +66,7 @@ const Products = ({ cat, filters, sort }) => {
 
   useEffect(() => {
     const re = async () =>{
-      const res =  await publicRequest.get(`users/favorites/${iduser}`);
+      const res =  await userRequest.get(`users/favorites/${iduser}`);
       const idFavorites = res.data.favoriteProduct.map((item) => item._id)
       setFavoriteProducts(idFavorites);
     };

@@ -3,14 +3,18 @@ import Navbar from '../components/Navbar'
 import Announcement from '../components/Announcement'
 import Footer from "../components/Footer"
 import '../App.css'
-import { Add, FavoriteBorderOutlined, Remove } from "@mui/icons-material"
+import { Add, FavoriteBorderOutlined, MoreVert, Remove, Send } from "@mui/icons-material"
 import { mobile } from "../responsive"
 import { useLocation, useHistory } from "react-router-dom";
-import { useEffect, useState } from "react"
-import { publicRequest } from "../requestMethods";
+import { useCallback, useEffect, useState } from "react"
+import { userRequest } from "../requestMethods";
 import { addProduct } from "../redux/cartRedux";
 import { useDispatch, useSelector } from "react-redux";
 import formatVND from "../util/formatVND"
+import Rating from "../components/Rating"
+import AverageRating from "../components/AverageRating"
+import '../css/Product.css';
+import toast from "react-hot-toast"
 
 
 const Container = styled.div``
@@ -66,15 +70,7 @@ const FilterTitle = styled.span`
     font-size: 20px;
     font-weight: 200;
 `
-// const FilterColor = styled.div`
-//     width: 20px;
-//     height: 20px;
-//     border-radius: 50%;
-//     background-color: ${(props) => props.color};
-//     margin: 0px 5px;
-//     cursor: pointer;
-//     border: 1px solid black;
-// `
+
 const FilterSize = styled.select`
     margin-left: 10px;
     padding: 5px;
@@ -117,7 +113,50 @@ const Button = styled.button`
     
 `
 
-const Comment = styled.div``
+const Bottom = styled.div`
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+`
+
+const Input = styled.input` 
+    width: 100%;
+    padding: 10px;
+    display: flex;
+    box-sizing: border-box;
+`
+
+const Comment = styled.div`
+   display: flex;
+   position: relative;
+   width: 80%;
+`
+const CommentEdit = styled.div`
+    width: 100%;
+    display: flex;
+`
+
+const CommentShow = styled.div`
+    border: 1px solid #ccc;
+    width: 80%;
+`
+
+const TitleComment = styled.div`
+    font-weight: bold;
+    font-size: 20px;
+`
+
+const Ul = styled.ul`
+    list-style-type: none; 
+    padding: 0;
+`
+
+const Li = styled.li`
+    margin-bottom: 10px;
+    padding: 10px; 
+`
+
+const Strong = styled.strong``
 
 
 
@@ -131,22 +170,41 @@ const Product = () => {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.user.currentUser);
     const next = useHistory();
+    const [comment, setComment] = useState('');
+    const [comments, setComments] = useState([]);
+    const [avgRate, setAvgRate] = useState();
+    const [commentEdit, setCommentEdit] = useState();
+    const [handleCommentId, setHandleCommentId] = useState();
+    const [refresh, setRefresh] = useState(false);
+
+
+    const hanldeRemoveComment = async (commentId) => {
+        const res = await userRequest.post(`users/comments/${commentId}`, {
+            productId: product._id
+        })
+        setRefresh(!refresh);
+
+    }
+
     useEffect(() => {
         const getProduct = async () => {
             try {
-                const res = await publicRequest.get("/products/find/" + id);
+                const res = await userRequest.get("products/find/" + id);
                 setProduct(res.data);
+                fetchComments(id);
+
             } catch { }
         };
         getProduct();
-    }, [id]);
+
+    }, [id, refresh]);
 
     const iduser = useSelector(state => state.user.currentUser)?._id;
-    const favorites =  async (id) => {
-        if( !iduser ){
+    const favorites = async (id) => {
+        if (!iduser) {
             next.push('/login');
-        } else{
-           await publicRequest.post(`users/favorites/${iduser}`, {productId: id});
+        } else {
+            await userRequest.post(`users/favorites/${iduser}`, { productId: id });
         }
     }
 
@@ -164,23 +222,76 @@ const Product = () => {
         } else {
 
             if (!size) {
-                alert("Vui lòng chọn size!");
+                toast.error("Vui lòng chọn size!");
             }
             if (!color) {
-                alert("Vui lòng chọn màu sắc!");
+                toast.error("Vui lòng chọn màu sắc!");
             }
             if (size && color) {
                 dispatch(
                     addProduct({ ...product, quantity, color, size })
 
                 );
+                toast.success("Thêm vào giỏ hàng thành công");
             }
 
         }
+
     };
 
+    const handleCommentEditSubmit = async (commentId) => {
+        try {
+            await userRequest.put(`users/comments/${commentId}`, {
+                commentId,
+                content: commentEdit
+            });
+            setCommentEdit('');
+            fetchComments(product._id); // Refresh comments after submitting a new one
+            setHandleCommentId("");
+        } catch (error) {
+            console.error('Lỗi gửi bình luận', error);
+        }
+    };
+
+    const fetchComments = async (productId) => {
+        try {
+            const res = await userRequest.get(`users/${productId}/comments`);
+            const latestComments = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+            setComments(latestComments);
+        } catch (error) {
+            // console.error("Lỗi khi tìm nạp nhận xét", error);
+        }
+    };
+    const userId = useSelector(state => state.user.currentUser)?._id;
+    const handleCommentSubmit = async () => {
+        try {
+            await userRequest.post('users/comments', {
+                userId, // Replace with the actual user ID
+                productId: product._id,
+                content: comment
+            });
+            setComment('');
+            if (product._id) {
+                fetchComments(product._id); // Refresh comments after submitting a new one
+            } else {
+                next.push("/login");
+            }
+        } catch (error) {
+            console.error('Lỗi gửi bình luận', error);
+        }
+    };
+
+    useEffect(() => {
+        const totalRate = product.rate?.reduce((acc, cur) => acc + cur.star, 0);
+        setAvgRate(totalRate / product.rate?.length);
+    }, [product]);
+
+    const handleRefresh = useCallback((state) => {
+        setRefresh(state);
+    }, []);
+
     return (
-        <Container>
+        <Container >
             <Announcement />
             <Navbar />
             <Wrapper>
@@ -189,11 +300,19 @@ const Product = () => {
                 </ImgContainer>
                 <InfoContainer>
                     <Title>{product.title}</Title>
+                    <AverageRating avgRate={avgRate} />
                     <Description>{product.description}</Description>
-                    <Price>{formatVND(product.price)}</Price>
+                    {product.oldprice ?
+                        <div className="d-flex  align-items-center ">
+                            <div style={{fontSize: "18px", textDecoration: "line-through", marginRight: "10px"}}>{formatVND(product.oldprice)}</div>
+                            <Price>{formatVND(product.price)}</Price>
+                        </div>
+                        : <Price>{formatVND(product.price)}</Price>}
+
                     <FilterContainer>
                         <Filter>
                             <FilterTitle>Màu sắc:</FilterTitle>
+
                             {product.color?.map((c) => (
                                 <div key={c} className={`radio-color ${c === color ? 'active' : ''}`} style={{ backgroundColor: c }}
                                     onClick={() => setColor(c)}
@@ -221,20 +340,88 @@ const Product = () => {
                             <Amount>{quantity}</Amount>
                             <Add onClick={() => handleQuantity("inc")} />
                         </AmountContainer>
-                        <FavoriteBorderOutlined   onClick={()=> favorites(product._id)} style={{cursor: "pointer"}} />
+                        <FavoriteBorderOutlined onClick={() => favorites(product._id)} style={{ cursor: "pointer" }} />
                         <Button onClick={handleClick}>Thêm vào giỏ hàng</Button>
 
                     </AddContainer>
 
                 </InfoContainer>
             </Wrapper>
-            <Wrapper>
-                <Comment>
+            <Wrapper onClick={() => {
+                setHandleCommentId("")
+            }}>
+                <Bottom>
+                    <Rating productId={product._id} handleRefresh={handleRefresh} refresh={refresh} />
+                    <Comment>
+                        <Input
+                            type="text"
+                            placeholder="Sản phẩm thoáng mát, thoải mái...."
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                        />
+                        <Button onClick={handleCommentSubmit}><Send /></Button>
+                    </Comment>
+                    <CommentShow>
 
-                </Comment>
+                        <TitleComment>Bình luận sản phẩm</TitleComment>
+                        <Ul>
+                            {comments.map((comment) => (
+                                // {comments !== null ? : 'Chưa có bình luận '} 
+                                <div key={comment._id} >
+
+                                    <Li className={`commentContainer`}>
+                                        <Strong>{comment.username}</Strong>
+                                        <div className="moreComments">
+                                            {comment.content}
+                                            <div >
+
+                                                <div className="actionIcons">
+
+                                                    <MoreVert    >
+                                                    </MoreVert>
+                                                    <div className="menuChildAction">
+                                                        <div onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            setCommentEdit(comment.content)
+                                                            setHandleCommentId(comment._id)
+                                                        }}>
+                                                            Chỉnh sửa
+                                                        </div>
+                                                        <div onClick={() => hanldeRemoveComment(comment._id)}>
+                                                            Xóa
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div className={`commentEdit  ${comment._id === handleCommentId ? 'active' : ''} `}>
+                                            {/* onBlur={() => setHandleCommentId("")} */}
+                                            <CommentEdit onClick={(e) => e.stopPropagation()} >
+                                                <Input
+                                                    type="text"
+                                                    placeholder={comment.content}
+                                                    value={commentEdit}
+                                                    onChange={(e) => setCommentEdit(e.target.value)}
+
+                                                />
+                                                <Button onClick={() => handleCommentEditSubmit(comment._id)}><Send /></Button>
+                                            </CommentEdit>
+                                        </div>
+
+                                    </Li>
+
+                                </div>
+                            ))}
+                        </Ul>
+                    </CommentShow>
+                </Bottom>
             </Wrapper>
             <Footer />
+
         </Container>
+
     )
 }
 

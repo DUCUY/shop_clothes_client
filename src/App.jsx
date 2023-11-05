@@ -2,7 +2,7 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Redirect, 
+  // Redirect, 
 } from "react-router-dom";
 import Cart from "./pages/Cart";
 import Home from "./pages/Home";
@@ -13,13 +13,15 @@ import Register from "./pages/Register";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
 import Favorites from "./pages/Favorites";
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
 import { Toaster } from 'react-hot-toast';
-import CheckOut from "./pages/CheckOut";
+import Search from "./pages/Search";
+import Profile from "./pages/Profile";
+import MyOrders from "./pages/MyOrders";
 
 
 function App() {
-  const user = useSelector((state) => state.user.currentUser);
+  // const user = useSelector((state) => state.user.currentUser);
 
   return (
     <>
@@ -50,12 +52,20 @@ function App() {
         <Route path="/favorites">
           <Favorites />
         </Route>
-        <Route path="/login">{user ? <Redirect to="/" /> : <Login />}</Route>
-        <Route path="/register">
-          {user ? <Redirect to="/login" /> : <Register />}
+        <Route path="/login">
+          <Login />
         </Route>
-        <Route path="/checkout">
-          <CheckOut />
+        <Route path="/register">
+          <Register />
+        </Route>
+        <Route path="/search">
+          <Search />
+        </Route>
+        <Route path="/my-profile">
+          <Profile />
+        </Route>
+        <Route path="/my-orders">
+          <MyOrders />
         </Route>
       </Switch>
     </Router>

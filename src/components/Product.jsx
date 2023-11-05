@@ -2,8 +2,9 @@ import { Favorite, FavoriteBorder, SearchOutlined } from "@mui/icons-material"
 import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
 import { styled } from "styled-components"
-import {publicRequest} from "../requestMethods"
+import {userRequest} from "../requestMethods"
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min"
+// import formatVND from "../util/formatVND"
 
 const Info = styled.div`
     opacity: 0;
@@ -62,8 +63,9 @@ const Icon = styled.div`
         transform: scale(1.1);
     }
 `
+// const Price = styled.div``
 
-
+// const InfoProduct = styled.div``
 
 const Product = ({ item, favorite }) => {
     const next = useHistory();
@@ -72,7 +74,7 @@ const Product = ({ item, favorite }) => {
         if( !iduser ){
             next.push('/login');
         }else {
-            await publicRequest.post(`users/favorites/${iduser}`, {productId: id});
+            await userRequest.post(`users/favorites/${iduser}`, {productId: id});
 
         }
     }
@@ -93,14 +95,12 @@ const Product = ({ item, favorite }) => {
                 <Icon onClick={()=> favorites(item._id)}>
                     {favorite ? <Favorite color="error"/> : <FavoriteBorder /> }
                 </Icon>
-
-
             </Info>
-            {/* <Price>{item.price.toLocaleString('vi', {style : 'currency', currency : 'VND'})}</Price> */}
-
-            {/* <Info>
-
-            </Info> */}
+            {/* <div>
+            <Price>{formatVND(item.price)}</Price>
+            <InfoProduct>{item.title}</InfoProduct>
+            </div> */}
+           
             
         </Container>
     )

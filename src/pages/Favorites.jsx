@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Announcement from '../components/Announcement'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -6,16 +6,30 @@ import styled from 'styled-components'
 import { FavoriteBorderOutlined } from '@mui/icons-material'
 import { useSelector } from 'react-redux'
 import { useHistory } from 'react-router-dom/cjs/react-router-dom.min'
-import { publicRequest } from '../requestMethods'
+import { userRequest } from '../requestMethods'
 import formatVND from '../util/formatVND'
-// import axios from 'axios'
 
 
-const Container = styled.div``
 
+// const Container = styled.div`
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   padding: 20px;
+// `
+// display: flex;
+  // justify-content: center;
+  // align-items: center;
+  // width: 80%;
+  // margin-bottom: 20px;
+  // border: 1px solid #ccc;
+  // padding: 10px;
 const Wrapper = styled.div`
+  width: 80%;
   display: flex;
-  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+
 `
 
 const Top = styled.div``
@@ -30,43 +44,48 @@ const Title = styled.h1`
 `
 
 const Hr = styled.hr`
-  width: 80%;
-  height: 2px;  
-  justify-content: center;
 `
 
 const Bottom = styled.div`
-  display: flex;
-  padding-top: 10px;
-  
-
+display: flex;
+flex-direction: column; /* Hiển thị các sản phẩm theo dạng cột */
+padding: 10px;
+gap: 20px;
 `
 
 const Left = styled.div`
+  flex: 1;
   display: flex;
-
-
+  align-items: center;
 `
 
 const Image = styled.img`
-  width: 10%;
-  height: auto;
- 
-  
+  width: 30%;
+  height: 20%;
+  border: 1px solid black;
 `
 
 const Center = styled.div`
+  flex: 2;
   display: flex;
-
-
+  align-items: center;
 `
 
 const Info = styled.div`
+  margin-bottom: 10px;
+  margin-right: 100px;
+  display: flex;
+  align-items: center;
+  height: 100%;
+
   
 `
 
 const Right = styled.div`
+  flex: 1;
   display: flex;
+  justify-content: center;
+  align-items: center;
 
   
 `
@@ -84,13 +103,13 @@ const Favorites = () => {
     if (!iduser) {
       next.push('/login');
     } else {
-      await publicRequest.post(`users/favorites/${iduser}`, { productId: id });
+      await userRequest.post(`users/favorites/${iduser}`, { productId: id });
     }
   }
 
   useEffect(() => {
     const re = async () => {
-      const res = await publicRequest.get(`users/favorites/${iduser}`);
+      const res = await userRequest.get(`users/favorites/${iduser}`);
       setFavoriteProducts(res.data.favoriteProduct);
 
     };
@@ -105,7 +124,7 @@ const Favorites = () => {
 
 
   return (
-    <Container>
+    <div>
       <Announcement />
       <Navbar />
 
@@ -113,35 +132,43 @@ const Favorites = () => {
         <Title>Danh sách sản phẩm yêu thích</Title>
       </Top>
       <Hr />
-      <Bottom>
-        {favoriteProducts?.map(product => (
-          <div key={product}>
-            <Wrapper>
-              <Left>
-                <Image src={product.img} ></Image>
-              </Left>
-              <Center>
-                <Info>
-                  Sản phẩm: {product.title}
-                </Info>
-                <Info>
-                  Giá: {formatVND(product.price)}
-                </Info>
-              </Center>
-              <Right>
-                {/* trai tim phai mau do */}
-                <Icon onClick={() => favorites(product._id)}>
-                  <FavoriteBorderOutlined />
-                </Icon>
-              </Right>
-            </Wrapper>
-          </div>
-        ))}
+      {/* <Container> */}
 
-      </Bottom>
+        <Bottom>
+          {favoriteProducts?.map(product => (
+            <div key={product}>
+              <Wrapper>
+                
+                  
+                    <Left>
+                      <Image src={product.img} ></Image>
+                    </Left>
+                    <Center>
+                      <Info>
+                        Sản phẩm: {product.title}
+                      </Info>
+                      <Info>
+                        Giá: {formatVND(product.price)}
+                      </Info>
+                    </Center>
+                    <Right>
+                      {/* trai tim phai mau do */}
+                      <Icon onClick={() => favorites(product._id)}>
+                        <FavoriteBorderOutlined />
+                      </Icon>
+                    </Right>
+                 
+
+              </Wrapper>
+            </div>
+          ))}
+
+        </Bottom>
+      {/* </Container> */}
 
       <Footer />
-    </Container>
+    </div>
+
   )
 }
 
